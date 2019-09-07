@@ -1,0 +1,13 @@
+bailers:
+- alert: KubePodCrashLooping
+  labels:
+    namespace: default
+    pod: nginx-.*
+  serviceAccountName: bailer
+  command:
+    - /bin/bash
+    - -c
+    - "kubectl delete pod -n $NAMESPACE $POD_NAME"
+  container:
+    image: bitnami/kubectl
+    tag: latest
