@@ -49,24 +49,16 @@ var clusterAuth bool
 
 //Main type for incoming alert payloads
 type PrometheusWebhook struct {
-	Status string   `json:"status"`
-	Alerts []Alerts `json:"alerts"`
-}
-
-//Labels for each alert
-type Labels struct {
-	Alertname string `json:"alertname"`
-	Namespace string `json:"namespace"`
-	PodName   string `json:"pod"`
-	Severity  string `json:"severity"`
+	Status string  `json:"status"`
+	Alerts []Alert `json:"alerts"`
 }
 
 //Alert type
-type Alerts struct {
-	Status   string    `json:"status"`
-	Labels   Labels    `json:"labels"`
-	StartsAt time.Time `json:"startsAt"`
-	EndsAt   time.Time `json:"endsAt"`
+type Alert struct {
+	Status   string            `json:"status"`
+	Labels   map[string]string `json:"labels"`
+	StartsAt time.Time         `json:"startsAt"`
+	EndsAt   time.Time         `json:"endsAt"`
 }
 
 //BAILER CONFIG FILE
@@ -95,12 +87,17 @@ type Bailers struct {
 //Check if the namespace and pod label filters match the labels on the alert
 //Pod filter compiles to a reg expression and we attempt to find a match anywhere
 //in the PodName label from alertmanager
-func needsBailing(labels Labels, bailer Bailer) bool {
+func needsBailing(alert Alert, bailer Bailer) bool {
+	var matches int = 0
+	for key, value := range bailer.Labels {
+		re, _ := regexp.Compile(value)
+		alertValue, match := alert.Labels[key]
+		if match && re.MatchString(alertValue) {
+			matches = matches + 1
+		}
+	}
+	return matches == len(bailer.Labels)
 
-	pod, _ := regexp.Compile(bailer.Labels["pod"])
-	return (labels.Alertname == bailer.Alert &&
-		labels.Namespace == bailer.Labels["namespace"] &&
-		pod.MatchString(labels.PodName))
 }
 
 //Create a kube client set
@@ -130,7 +127,7 @@ func kubeClient(kubeConfig string, clusterAuth bool) kubernetes.Clientset {
 }
 
 //Run the bailer
-func bail(labels Labels, bailer Bailer, kubeClient kubernetes.Clientset) {
+func bail(alert Alert, bailer Bailer, kubeClient kubernetes.Clientset) {
 	//Create string from unix ts for unique job name
 	ts := time.Now().Unix()
 	var stamp string = fmt.Sprint(ts)
@@ -145,15 +142,12 @@ func bail(labels Labels, bailer Bailer, kubeClient kubernetes.Clientset) {
 	cmd := bailer.Command
 
 	//EnvVars from the labels on the alert, these can be used in bailer scripts
-	envVars := []apiv1.EnvVar{
-		{
-			Name:  "POD_NAME",
-			Value: labels.PodName,
-		},
-		{
-			Name:  "NAMESPACE",
-			Value: labels.Namespace,
-		},
+	var envVars []apiv1.EnvVar
+	for key, value := range alert.Labels {
+		envVarKey := strings.ToUpper("ALERT_" + strings.Replace(key, "-", "_", -1))
+		envVar := apiv1.EnvVar{Name: envVarKey, Value: value}
+		envVars = append(envVars, envVar)
+
 	}
 
 	//Bailer job
@@ -190,7 +184,7 @@ func bail(labels Labels, bailer Bailer, kubeClient kubernetes.Clientset) {
 	}
 	fmt.Printf("Created job %q.\n", jobName)
 	fmt.Printf("In Namespace %q.\n", jobNamespace)
-	fmt.Printf("Started At: %q \n", result.Status.StartTime)
+	fmt.Printf("Job: %q \n", result)
 }
 
 var rootCmd = &cobra.Command{
@@ -229,17 +223,16 @@ Bailer provides a webhook driven way of triggering kubernetes jobs from promethe
 						//If it's a firing alert, iterate through the Bailers in the config
 						//and use needsBailing to check if the alert matches a configured Bailer
 						for _, b := range bailers.Bailers {
-							if needsBailing(a.Labels, b) {
+							if needsBailing(a, b) {
 								//If the alert matches a bailer config:
 								// - Use kube client to create a kube job
 								// - Job should use bailer image spec
-								// - Job should user bailer cmd spec
+								// - Job should use bailer cmd spec
 								// - Job should have alert labels available as env vars
-								fmt.Println("NAMESPACE:", a.Labels.Namespace)
-								fmt.Println("POD_NAME:", a.Labels.PodName)
+								fmt.Println("Alert Labels:", a.Labels)
 								fmt.Println("Will use container image:", b.Container.Image)
 								fmt.Println("To run:", strings.Join(b.Command, " "))
-								bail(a.Labels, b, kc)
+								bail(a, b, kc)
 							}
 						}
 					}
