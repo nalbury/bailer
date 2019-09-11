@@ -18,16 +18,10 @@ package cmd
 import (
 	"fmt"
 	"github.com/bamzi/jobrunner"
+	faktory "github.com/contribsys/faktory/client"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	batchv1 "k8s.io/api/batch/v1"
-	apiv1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
 	"os"
 	"os/user"
@@ -100,93 +94,6 @@ func needsBailing(alert Alert, bailer Bailer) bool {
 
 }
 
-//Create a kube client set
-func kubeClient(kubeConfig string, clusterAuth bool) kubernetes.Clientset {
-	var clientset *kubernetes.Clientset
-	if clusterAuth {
-		config, err := rest.InClusterConfig()
-		if err != nil {
-			panic(err)
-		}
-		clientset, err = kubernetes.NewForConfig(config)
-		if err != nil {
-			panic(err)
-		}
-	} else {
-		config, err := clientcmd.BuildConfigFromFlags("", kubeConfig)
-		if err != nil {
-			panic(err)
-		}
-		clientset, err = kubernetes.NewForConfig(config)
-		if err != nil {
-			panic(err)
-		}
-	}
-	return *clientset
-
-}
-
-//Run the bailer
-func bail(alert Alert, bailer Bailer, kubeClient kubernetes.Clientset) {
-	//Create string from unix ts for unique job name
-	ts := time.Now().Unix()
-	var stamp string = fmt.Sprint(ts)
-
-	alert_name := strings.ToLower(bailer.Alert)
-	jobName := "bailer-" + alert_name + "-" + stamp
-	jobNamespace := namespace
-	serviceAccountName := bailer.ServiceAccountName
-
-	//The image and cmd for the bailer job
-	image := bailer.Container.Image + ":" + bailer.Container.Tag
-	cmd := bailer.Command
-
-	//EnvVars from the labels on the alert, these can be used in bailer scripts
-	var envVars []apiv1.EnvVar
-	for key, value := range alert.Labels {
-		envVarKey := strings.ToUpper("ALERT_" + strings.Replace(key, "-", "_", -1))
-		envVar := apiv1.EnvVar{Name: envVarKey, Value: value}
-		envVars = append(envVars, envVar)
-
-	}
-
-	//Bailer job
-	job := &batchv1.Job{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      jobName,
-			Namespace: jobNamespace,
-		},
-
-		Spec: batchv1.JobSpec{
-			Template: apiv1.PodTemplateSpec{
-				Spec: apiv1.PodSpec{
-					Containers: []apiv1.Container{
-						{
-							Name:    alert_name,
-							Image:   image,
-							Command: cmd,
-							Env:     envVars,
-						},
-					},
-					RestartPolicy:      "Never",
-					ServiceAccountName: serviceAccountName,
-				},
-			},
-		},
-	}
-	//Run the bailer job
-	fmt.Println("Creating job... ")
-
-	jobsClient := kubeClient.BatchV1().Jobs(jobNamespace)
-	result, err := jobsClient.Create(job)
-	if err != nil {
-		panic(fmt.Errorf("Unable to create job: %s \n", err))
-	}
-	fmt.Printf("Created job %q.\n", jobName)
-	fmt.Printf("In Namespace %q.\n", jobNamespace)
-	fmt.Printf("Job: %q \n", result)
-}
-
 var rootCmd = &cobra.Command{
 	Use:   "bailer",
 	Short: "Bail out your kubernetes cluster",
@@ -202,9 +109,6 @@ Bailer provides a webhook driven way of triggering kubernetes jobs from promethe
 		}
 		fmt.Println(bailers)
 		fmt.Println(kubeConfig)
-
-		// Create kube client
-		kc := kubeClient(kubeConfig, clusterAuth)
 
 		// Start jobrunner for background jobs
 		jobrunner.Start()
@@ -232,7 +136,12 @@ Bailer provides a webhook driven way of triggering kubernetes jobs from promethe
 								fmt.Println("Alert Labels:", a.Labels)
 								fmt.Println("Will use container image:", b.Container.Image)
 								fmt.Println("To run:", strings.Join(b.Command, " "))
-								bail(a, b, kc)
+								client, err := faktory.Open()
+								job := faktory.NewJob("Bail", a, b, kubeConfig, clusterAuth)
+								err = client.Push(job)
+								if err != nil {
+									panic(fmt.Errorf("unable to create faktory job for alert"))
+								}
 							}
 						}
 					}

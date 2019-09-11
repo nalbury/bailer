@@ -5,6 +5,8 @@ go 1.12
 require (
 	github.com/Azure/go-autorest/autorest/adal v0.6.0 // indirect
 	github.com/bamzi/jobrunner v0.0.0-20190810144113-852b7ca4d475
+	github.com/contribsys/faktory v1.0.1-1.0.20190721213733-1cd2b871d15e
+	github.com/contribsys/faktory_worker_go v0.0.0-20190428165239-86cdd9bae9d4
 	github.com/docker/spdystream v0.0.0-20160310174837-449fdfce4d96 // indirect
 	github.com/elazarl/goproxy v0.0.0-20170405201442-c4fc26588b6e // indirect
 	github.com/evanphx/json-patch v4.2.0+incompatible // indirect
