@@ -57,27 +57,42 @@ func kubeClient(kubeConfig string, clusterAuth bool) kubernetes.Clientset {
 
 }
 
+//Faktory worker for running bailer jobs
 func bail(ctx worker.Context, args ...interface{}) error {
 
+	//This could be greatly improved if we can preserve the original structs passed to the worker...
+	//For now we need to parse the values from the args (a slice of interface{}), and use type assertion
+
+	//Get map of interfaces containing the alert labels
 	alert := args[0].(map[string]interface{})
 	alertLabels := alert["labels"].(map[string]interface{})
+
+	//Get main bailer map of interfaces from the worker args
 	bailer := args[1].(map[string]interface{})
+
+	//Get map of interfaces containing the container image and tag
 	bailerContainer := bailer["Container"].(map[string]interface{})
 
+	//Get kubeconfig and cluster auth from the worker args
 	kubeConfig := args[2].(string)
 	clusterAuth := args[3].(bool)
 	kubeClient := kubeClient(kubeConfig, clusterAuth)
 
+	//stringified timestamp for unique naming
 	ts := time.Now().Unix()
 	var stamp string = fmt.Sprint(ts)
 
+	//Get alert name from bailer map of interfaces and use it to create the jobName string
 	alertName := strings.ToLower(bailer["Alert"].(string))
 	jobName := "bailer-" + alertName + "-" + stamp
 	jobNamespace := namespace
+
+	//Get service account to run bailer job with from map of interfaces
 	serviceAccountName := bailer["ServiceAccountName"].(string)
 
-	//The image and cmd for the bailer job
+	//The image and tag cmd for the bailer job need to be cast to strings
 	image := bailerContainer["Image"].(string) + ":" + bailerContainer["Tag"].(string)
+	//cmd needs to be cast as a slice of strings
 	var cmd []string
 	for _, s := range bailer["Command"].([]interface{}) {
 		cmd = append(cmd, s.(string))
@@ -110,6 +125,7 @@ func bail(ctx worker.Context, args ...interface{}) error {
 							Env:     envVars,
 						},
 					},
+					BackoffLimit:       0,
 					RestartPolicy:      "Never",
 					ServiceAccountName: serviceAccountName,
 				},
