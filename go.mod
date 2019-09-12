@@ -4,7 +4,6 @@ go 1.12
 
 require (
 	github.com/Azure/go-autorest/autorest/adal v0.6.0 // indirect
-	github.com/bamzi/jobrunner v0.0.0-20190810144113-852b7ca4d475
 	github.com/contribsys/faktory v1.0.1-1.0.20190721213733-1cd2b871d15e
 	github.com/contribsys/faktory_worker_go v0.0.0-20190428165239-86cdd9bae9d4
 	github.com/docker/spdystream v0.0.0-20160310174837-449fdfce4d96 // indirect
@@ -29,7 +28,6 @@ require (
 	golang.org/x/sys v0.0.0-20190616124812-15dcb6c0061f // indirect
 	golang.org/x/text v0.3.2 // indirect
 	gopkg.in/inf.v0 v0.9.0 // indirect
-	gopkg.in/robfig/cron.v3 v3.0.0-00010101000000-000000000000 // indirect
 	k8s.io/api v0.0.0-20190313235455-40a48860b5ab
 	k8s.io/apimachinery v0.0.0-20190313205120-d7deff9243b1
 	k8s.io/client-go v11.0.0+incompatible
@@ -38,4 +36,6 @@ require (
 	k8s.io/utils v0.0.0-20190829053155-3a4a5477acf8 // indirect
 )
 
-replace gopkg.in/robfig/cron.v3 => github.com/robfig/cron/v3 v3.0.0
+//replace gopkg.in/robfig/cron.v3 => github.com/robfig/cron/v3 v3.0.0
+
+replace github.com/contribsys/faktory => github.com/ClaytonNorthey92/faktory v1.0.1-1.0.20190721213733-1cd2b871d15e

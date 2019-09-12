@@ -107,6 +107,8 @@ func bail(ctx worker.Context, args ...interface{}) error {
 
 	}
 
+	backoffLimit := int32(0)
+
 	//Bailer job
 	job := &batchv1.Job{
 		ObjectMeta: metav1.ObjectMeta{
@@ -125,11 +127,11 @@ func bail(ctx worker.Context, args ...interface{}) error {
 							Env:     envVars,
 						},
 					},
-					BackoffLimit:       0,
 					RestartPolicy:      "Never",
 					ServiceAccountName: serviceAccountName,
 				},
 			},
+			BackoffLimit: &backoffLimit,
 		},
 	}
 	//Run the bailer job

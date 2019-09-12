@@ -17,7 +17,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/bamzi/jobrunner"
 	faktory "github.com/contribsys/faktory/client"
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/cobra"
@@ -110,8 +109,6 @@ Bailer provides a webhook driven way of triggering kubernetes jobs from promethe
 		fmt.Println(bailers)
 		fmt.Println(kubeConfig)
 
-		// Start jobrunner for background jobs
-		jobrunner.Start()
 		// Start up gin
 		router := gin.Default()
 
