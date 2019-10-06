@@ -1,0 +1,56 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: {{ template "bailer.fullname" . }}
+  labels:
+{{ include "bailer.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.bailer.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "bailer.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "bailer.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.bailer.image.repository }}:{{ .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.bailer.image.pullPolicy }}
+          args:
+            - --config 
+            - /etc/bailer/config.yaml 
+            - --namespace 
+            - {{ .Release.Namespace }}
+            - --clusterauth
+          env:
+            - name: FAKTORY_URL
+              value: tcp://{{ template "bailer.fullname" . }}-faktory.{{ .Release.Namespace }}.svc.cluster.local:7419
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          resources:
+{{ toYaml .Values.bailer.resources | indent 12 }}
+          volumeMounts:
+            - name: config
+              mountPath: /etc/bailer/
+      volumes:
+        - name: config
+          configMap:
+            name: {{ include "bailer.fullname" . }}-config
+    {{- with .Values.bailer.nodeSelector }}
+      nodeSelector:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.bailer.affinity }}
+      affinity:
+{{ toYaml . | indent 8 }}
+    {{- end }}
+    {{- with .Values.bailer.tolerations }}
+      tolerations:
+{{ toYaml . | indent 8 }}
+    {{- end }}
