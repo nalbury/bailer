@@ -1,4 +1,4 @@
-module gitlab.pizza/nalbury/bailer
+module github.com/nalbury/bailer
 
 go 1.12
 

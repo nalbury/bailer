@@ -15,8 +15,8 @@ limitations under the License.
 */
 package main
 
-import "gitlab.pizza/nalbury/bailer/cmd"
+import "github.com/nalbury/bailer/cmd"
 
 func main() {
-  cmd.Execute()
+	cmd.Execute()
 }
