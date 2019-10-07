@@ -1,0 +1,100 @@
+# Default values for bailer.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+nameOverride: ""
+fullnameOverride: ""
+
+bailer:
+  replicaCount: 1
+
+  image:
+    repository: quay.io/nalbury/bailer
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 80
+
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: pizza-traefik
+    hosts:
+      - host: bailer.kube.pizza
+        paths:
+          - /
+
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  resources: {}
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+bailerWorker:
+  replicaCount: 1
+
+  resources: {}
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+faktory:
+  image:
+    repository: contribsys/faktory
+    version: latest
+    pullPolicy: Always
+
+  service:
+    type: ClusterIP
+    port: 7419
+
+  resources: {}
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  nodeSelector: {}
+
+  tolerations: []
+
+  affinity: {}
+
+config:
+  bailers:
+    - alert: KubePodCrashLooping
+      labels:
+        namespace: default
+        pod: ^nginx-.*
+      serviceAccountName: bailer
+      command:
+        - /bin/bash
+        - -c
+        - "kubectl delete pod -n $ALERT_NAMESPACE $ALERT_POD"
+      container:
+        image: bitnami/kubectl
+        tag: latest
