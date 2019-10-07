@@ -24,9 +24,14 @@ spec:
             - /faktory
             - -b
             - :7419
+            - -w
+            - :7420
           ports:
             - name: tcp
-              containerPort: 7419 
+              containerPort: 7419
+              protocol: TCP
+            - name: http
+              containerPort: 7420
               protocol: TCP
           resources:
 {{ toYaml .Values.faktory.resources | indent 12 }}

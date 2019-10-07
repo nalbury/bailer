@@ -84,9 +84,24 @@ faktory:
 
   affinity: {}
 
+  dash:
+    enabled: true
+    service:
+      type: ClusterIP
+      port: 80
+
+    ingress:
+      enabled: true
+      annotations:
+        kubernetes.io/ingress.class: pizza-traefik
+      hosts:
+        - host: bailer-faktory.kube.pizza
+          paths:
+            - /
+
 config:
   bailers:
-    - alert: KubePodCrashLooping
+    - alert: PodCrashLooping
       labels:
         namespace: default
         pod: ^nginx-.*
