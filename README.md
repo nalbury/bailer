@@ -10,6 +10,7 @@ At a high level, Bailer consists of the following components
 Bailer does not attempt to handle any of the actual alerting logic (retries, grouping, inhibition, silencing etc.) when bailing you out, and assumes that you've configured AlertManager to your specifications. 
 
 [More informtation on AlertManager can be found here.](https://prometheus.io/docs/alerting/alertmanager/)
+
 [More inforomation on configuring AlertManger to send payloads to Bailer can be found in the **Configuration** section below](https://github.com/nalbury/bailer#alertmanager)
 
 ### Bailer
