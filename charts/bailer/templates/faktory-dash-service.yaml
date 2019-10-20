@@ -1,18 +1,26 @@
-{{- if .Values.faktory.dash.enabled }}
+{{- if and .Values.faktory.enabled .Values.faktory.dash.enabled}}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "bailer.fullname" . }}-faktory-dash
+  name: {{ template "bailer.faktory.fullname" . }}-dash
   labels:
 {{ include "bailer.labels" . | indent 4 }}
+{{- if .Values.faktory.dash.service.annotations }}
+  annotations:
+  {{- range $key, $val := .Values.faktory.dash.service.annotations }}
+    {{ $key }}: {{ $val }}
+  {{- end }}
+{{- end }}
 spec:
   type: {{ .Values.faktory.dash.service.type }}
   ports:
-    - port: {{ .Values.faktory.dash.service.port }}
+    {{- range .Values.faktory.dash.service.ports }} 
+    - port: {{ . }}
       targetPort: http
       protocol: TCP
       name: http
+    {{- end }}
   selector:
-    app.kubernetes.io/name: {{ include "bailer.name" . }}-faktory
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{ include "bailer.name" . }}-faktory
+    release: {{ .Release.Name }}
 {{- end }}

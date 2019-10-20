@@ -35,11 +35,54 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "bailer.labels" -}}
-app.kubernetes.io/name: {{ include "bailer.name" . }}
-helm.sh/chart: {{ include "bailer.chart" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
+chart: {{ include "bailer.chart" . }}
+release: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+version: {{ .Chart.AppVersion | quote }}
 {{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
+managed-by: {{ .Release.Service }}
+{{- end -}}
+
+{{/*
+Create worker name.
+*/}}
+{{- define "bailer.bailerWorker.fullname" -}}
+{{- if .Values.bailerWorker.fullnameOverride }}
+{{ .Values.bailerWorker.fullnameOverride }}
+{{- else }}
+{{- printf "%s-worker" ( include "bailer.fullname" . ) -}} 
+{{- end }}
+{{- end -}}
+
+{{/*
+Create faktory name.
+*/}}
+{{- define "bailer.faktory.fullname" -}}
+{{- if .Values.faktory.fullnameOverride }}
+{{ .Values.faktory.fullnameOverride }}
+{{- else }}
+{{- printf "%s-faktory" ( include "bailer.fullname" . ) -}} 
+{{- end }}
+{{- end -}}
+
+{{/*
+Create bailer service account name
+*/}}
+{{- define "bailer.serviceAccount" -}}
+{{- if and ( .Values.rbac.serviceAccount ) ( eq .Values.rbac.enabled false ) }}
+{{ .Values.rbac.serviceAccount }}
+{{- else }}
+{{- include "bailer.fullname" . }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Create faktory url
+*/}}
+{{- define "bailer.faktory.url" -}}
+{{- if eq .Values.faktory.enabled false }}
+{{ .Values.faktory.externalUrl }}
+{{- else }}
+{{- printf "tcp://%s.%s.svc:%0.0f" ( include "bailer.faktory.fullname" . ) .Release.Namespace .Values.faktory.service.port -}}
+{{- end }}
 {{- end -}}
