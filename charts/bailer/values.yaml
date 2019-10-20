@@ -53,16 +53,15 @@ bailer:
 
   ingress:
     # bailer.ingress.enabled -- Enable/Disable an ingress definition for bailer
-    enabled: true
+    enabled: false
     # bailer.ingress.annotations -- A map of ingress annotations for bailer
-    annotations:
-      kubernetes.io/ingress.class: pizza-traefik
+    annotations: {}
     # bailer.ingress.hosts -- A list of igress host definitions for bailer
-    hosts:
-      - host: bailer.kube.pizza
-        paths:
-          - path: /
-            servicePort: 80
+    hosts: []
+    # - host: bailer.kube.pizza
+    #   paths:
+    #     - path: /
+    #       servicePort: 80
 
     # bailer.ingress.tls -- A list of ingress tls secrets
     tls: []
@@ -152,14 +151,13 @@ faktory:
       # faktory.dash.ingress.enabled -- Enable/Disable an ingress definition for the faktory dashboard
       enabled: true
       # faktory.dash.ingress.annotations -- A map of ingress annotations for the faktory dashboard
-      annotations:
-        kubernetes.io/ingress.class: pizza-traefik
+      annotations: {}
       # faktory.dash.ingress.hosts -- A list of igress host definitions for the faktory dashboard
       hosts:
-        - host: bailer-faktory.kube.pizza
-          paths:
-            - path: /
-              servicePort: 80
+      # - host: bailer-faktory.kube.pizza
+      #   paths:
+      #     - path: /
+      #       servicePort: 80
 
       # faktory.dash.ingress.tls -- A list of ingress tls secrets
       tls: []
@@ -169,17 +167,17 @@ faktory:
 
 # config -- Bailer config yaml, see https://github.com/nalbury/bailer for more info.
 config:
-  bailers:
-    - alert: PodCrashLooping
-      labels:
-        namespace: default
-        pod: ^nginx-.*
-      serviceAccountName: bailer-admin
-      ttlSecondsAfterFinished: 900
-      command:
-        - /bin/bash
-        - -c
-        - "kubectl delete pod -n $ALERT_NAMESPACE $ALERT_POD"
-      container:
-        image: bitnami/kubectl
-        tag: latest
+  bailers: []
+  # - alert: PodCrashLooping
+  #   labels:
+  #     namespace: default
+  #     pod: ^nginx-.*
+  #   serviceAccountName: bailer-admin
+  #   ttlSecondsAfterFinished: 900
+  #   command:
+  #     - /bin/bash
+  #     - -c
+  #     - "kubectl delete pod -n $ALERT_NAMESPACE $ALERT_POD"
+  #   container:
+  #     image: bitnami/kubectl
+  #     tag: latest

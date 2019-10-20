@@ -1,2 +1,3 @@
 /charts/bailer/charts/*.tgz
 *.swp
+/test-values.yaml
