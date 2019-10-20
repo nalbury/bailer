@@ -16,9 +16,9 @@ Current chart version is `0.1.0`
 | bailer.image.pullPolicy | string | `"Always"` | Pull policy to use for bailer container image |
 | bailer.image.repository | string | `"quay.io/nalbury/bailer"` | Container image to use for bailer |
 | bailer.image.tag | string | `nil` | Container image tag to use for bailer, defaults to the appVersion set in the chart's Chart.yaml (usually matches the chart version) |
-| bailer.ingress.annotations | object | `{"kubernetes.io/ingress.class":"pizza-traefik"}` | A map of ingress annotations for bailer |
-| bailer.ingress.enabled | bool | `true` | Enable/Disable an ingress definition for bailer |
-| bailer.ingress.hosts | list | `[{"host":"bailer.kube.pizza","paths":[{"path":"/","servicePort":80}]}]` | A list of igress host definitions for bailer |
+| bailer.ingress.annotations | object | `{}` | A map of ingress annotations for bailer |
+| bailer.ingress.enabled | bool | `false` | Enable/Disable an ingress definition for bailer |
+| bailer.ingress.hosts | list | `[]` | A list of igress host definitions for bailer |
 | bailer.ingress.tls | list | `[]` | A list of ingress tls secrets |
 | bailer.nodeSelector | object | `{}` | A map of node selector labels for the bailer backend deployment |
 | bailer.replicaCount | int | `1` | Replica's for the primary api backend deployment |
@@ -33,12 +33,12 @@ Current chart version is `0.1.0`
 | bailerWorker.replicaCount | int | `1` | Replica's for the bailer worker deployment |
 | bailerWorker.resources | object | `{}` | A map of container resource limits and requests for the bailer worker contatiners |
 | bailerWorker.tolerations | list | `[]` | A list of node tolerations for the bailer worker deployment |
-| config | object | `{"bailers":[{"alert":"PodCrashLooping","command":["/bin/bash","-c","kubectl delete pod -n $ALERT_NAMESPACE $ALERT_POD"],"container":{"image":"bitnami/kubectl","tag":"latest"},"labels":{"namespace":"default","pod":"^nginx-.*"},"serviceAccountName":"bailer"}]}` | Bailer config yaml, see https://github.com/nalbury/bailer for more info. |
+| config | object | `{"bailers":[]}` | Bailer config yaml, see https://github.com/nalbury/bailer for more info. |
 | faktory.affinity | object | `{}` | Pod affinity spec for the faktory deployment |
-| faktory.dash.enabled | bool | `true` | Enable/Disable the faktory dashboard |
-| faktory.dash.ingress.annotations | object | `{"kubernetes.io/ingress.class":"pizza-traefik"}` | A map of ingress annotations for the faktory dashboard |
-| faktory.dash.ingress.enabled | bool | `true` | Enable/Disable an ingress definition for the faktory dashboard |
-| faktory.dash.ingress.hosts | list | `[{"host":"bailer-faktory.kube.pizza","paths":[{"path":"/","servicePort":80}]}]` | A list of igress host definitions for the faktory dashboard |
+| faktory.dash.enabled | bool | `false` | Enable/Disable the faktory dashboard |
+| faktory.dash.ingress.annotations | object | `{}` | A map of ingress annotations for the faktory dashboard |
+| faktory.dash.ingress.enabled | bool | `false` | Enable/Disable an ingress definition for the faktory dashboard |
+| faktory.dash.ingress.hosts | string | `nil` | A list of igress host definitions for the faktory dashboard |
 | faktory.dash.ingress.tls | list | `[]` | A list of ingress tls secrets |
 | faktory.dash.service.annotations | object | `{}` | A map of service annotations for the faktory fashbaord |
 | faktory.dash.service.ports | list | `[80]` | List of TCP ports for the faktory dashboard service, the target port is hardcoded in the service definition to ensure it's connection to the backend api deployment |
