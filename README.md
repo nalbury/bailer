@@ -10,14 +10,14 @@ At a high level, Bailer consists of the following components
 Bailer does not attempt to handle any of the actual alerting logic (retries, grouping, inhibition, silencing etc.) when bailing you out, and assumes that you've configured AlertManager to your specifications. 
 
 [More informtation on AlertManager can be found here.](https://prometheus.io/docs/alerting/alertmanager/)
-[More inforomation on configuring AlertManger to send payloads to Bailer can be found in the **Configuration** section below](https://github.com/nalbury/bailer/blob/master/README.md)
+[More inforomation on configuring AlertManger to send payloads to Bailer can be found in the **Configuration** section below](https://github.com/nalbury/bailer#alertmanager)
 
 ### Bailer
 Bailer's primary app is a simple API that accepts POST requests on a `/alert` route. It uses [gin](https://github.com/gin-gonic/gin to handle the actual http server, [cobra](https://github.com/spf13/cobra) for creating the command line interface, and [viper](https://github.com/spf13/viper) for reading it's configuration file(described in more detail below). 
 
 A bailer is a command + container that should be run when an alert matches certain labels. Once the app receives a payload that matches a configred bailer, it creates a task in the Faktory queue and returns `200`. 
 
-[More information on configuring Bailer can be found in the **Configuration** section below](https://github.com/nalbury/bailer/blob/master/README.md)
+[More information on configuring Bailer can be found in the **Configuration** section below](https://github.com/nalbury/bailer#bailer-2)
 
 ### Faktory
 Bailer uses Faktory to manage it's async task processing. It uses Redis to provide a queue for background jobs in Bailer, allowing the api to receive additional alert payloads, while the worker handles bailing your kubernetes cluster out. Each Faktory job has set of arguments and are placed into queues for workers to fetch and execute. 
