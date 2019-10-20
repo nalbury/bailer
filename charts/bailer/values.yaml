@@ -136,7 +136,7 @@ faktory:
 
   dash:
     # faktory.dash.enabled -- Enable/Disable the faktory dashboard
-    enabled: true
+    enabled: false
     service:
       # faktory.dash.service.type -- Service type for the faktory dashbaord
       type: ClusterIP
@@ -149,7 +149,7 @@ faktory:
 
     ingress:
       # faktory.dash.ingress.enabled -- Enable/Disable an ingress definition for the faktory dashboard
-      enabled: true
+      enabled: false
       # faktory.dash.ingress.annotations -- A map of ingress annotations for the faktory dashboard
       annotations: {}
       # faktory.dash.ingress.hosts -- A list of igress host definitions for the faktory dashboard
