@@ -4,13 +4,21 @@ metadata:
   name: {{ template "bailer.fullname" . }}
   labels:
 {{ include "bailer.labels" . | indent 4 }}
+{{- if .Values.bailer.service.annotations }}
+  annotations:
+  {{- range $key, $val := .Values.bailer.service.annotations }}
+    {{ $key }}: {{ $val }}
+  {{- end }}
+{{- end }}
 spec:
   type: {{ .Values.bailer.service.type }}
   ports:
-    - port: {{ .Values.bailer.service.port }}
+    {{- range .Values.bailer.service.ports }}
+    - port: {{ . }}
       targetPort: http
       protocol: TCP
       name: http
+    {{- end }}
   selector:
-    app.kubernetes.io/name: {{ include "bailer.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{ include "bailer.name" . }}
+    release: {{ .Release.Name }}

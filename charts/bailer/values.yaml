@@ -1,51 +1,82 @@
 # Default values for bailer.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+# nameOverride -- Override the installed chart's name
 nameOverride: ""
+# fullnameOverride -- Override the the name prepended to the installed kubernetes resources
 fullnameOverride: ""
 
+rbac:
+  # rbac.enabled -- Enable/Disable creation of a cluster role, service account and rolebinding for bailer
+  enabled: true
+  # rbac.serviceAccount -- Service account for bailer to use, ignored if rbac is enabled
+  serviceAccount: ""
+
 bailer:
+  # bailer.replicaCount -- Replica's for the primary api backend deployment
   replicaCount: 1
 
   image:
+    # bailer.image.repository -- Container image to use for bailer
     repository: quay.io/nalbury/bailer
+    # bailer.image.tag -- Container image tag to use for bailer, defaults to the appVersion set in the chart's Chart.yaml (usually matches the chart version)
+    tag:
+    # bailer.image.pullPolicy -- Pull policy to use for bailer container image
     pullPolicy: Always
 
+  # bailer.resources -- A map of container resource limits and requests
+  resources: {}
+    # limits:
+    #  cpu: 100m
+    #  memory: 128Mi
+    # requests:
+    #  cpu: 100m
+    #  memory: 128Mi
+
+  # bailer.nodeSelector -- A map of node selector labels for the bailer backend deployment
+  nodeSelector: {}
+
+  # bailer.tolerations -- A list of node tolerations for the bailer backend deployment
+  tolerations: []
+
+  # bailer.affinity -- Pod affinity spec for the bailer backend deployment
+  affinity: {}
+
   service:
+    # bailer.service.type -- service type for bailer
     type: ClusterIP
-    port: 80
+    # bailer.service.annotations -- A map of service annotations for bailer
+    annotations: {}
+    # bailer.service.ports -- List of TCP ports for the bailer service, the target port is hardcoded in the service definition to ensure it's connection to the backend api deployment
+    ports:
+      - 80 
 
   ingress:
+    # bailer.ingress.enabled -- Enable/Disable an ingress definition for bailer
     enabled: true
+    # bailer.ingress.annotations -- A map of ingress annotations for bailer
     annotations:
       kubernetes.io/ingress.class: pizza-traefik
+    # bailer.ingress.hosts -- A list of igress host definitions for bailer
     hosts:
       - host: bailer.kube.pizza
         paths:
-          - /
+          - path: /
+            servicePort: 80
 
+    # bailer.ingress.tls -- A list of ingress tls secrets
     tls: []
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
 
-  resources: {}
-    # limits:
-    #  cpu: 100m
-    #  memory: 128Mi
-    # requests:
-    #  cpu: 100m
-    #  memory: 128Mi
-
-  nodeSelector: {}
-
-  tolerations: []
-
-  affinity: {}
-
 bailerWorker:
+  # bailerWorker.fullnameOverride -- Override the default naming for the bailer worker deployment
+  fullnameOverride: ""
+  # bailerWorker.replicaCount -- Replica's for the bailer worker deployment
   replicaCount: 1
 
+  # bailerWorker.resources -- A map of container resource limits and requests for the bailer worker contatiners
   resources: {}
     # limits:
     #  cpu: 100m
@@ -54,22 +85,31 @@ bailerWorker:
     #  cpu: 100m
     #  memory: 128Mi
 
+  # bailerWorker.nodeSelector -- A map of node selector labels for the bailer worker deployment
   nodeSelector: {}
 
+  # bailerWorker.tolerations -- A list of node tolerations for the bailer worker deployment
   tolerations: []
 
+  # bailerWorker.affinity -- Pod affinity spec for the bailer worker deployment
   affinity: {}
 
 faktory:
+  # faktory.enabled -- Enables disables an in cluster faktory deployment
+  enabled: true
+  # faktory.externalUrl -- If faktory.enabled is false, use this to set an external Faktory URL for bailer, ignored if faktory is enabled
+  externalUrl: ""
+  # faktory.fullnameOverride -- Override the default naming for the faktory deployment
+  fullnameOverride: ""
   image:
+    # faktory.image.repository -- Container image to use for faktory
     repository: contribsys/faktory
-    version: latest
+    # faktory.image.tag -- Container image tag to use for faktory
+    tag: latest
+    # faktory.image.pullPolicy -- Pull policy to use for faktory container image
     pullPolicy: Always
 
-  service:
-    type: ClusterIP
-    port: 7419
-
+  # faktory.resources -- A map of container resource limits and requests
   resources: {}
     # limits:
     #  cpu: 100m
@@ -78,34 +118,64 @@ faktory:
     #  cpu: 100m
     #  memory: 128Mi
 
+  # faktory.nodeSelector -- A map of node selector labels for the faktory deployment
   nodeSelector: {}
 
+  # faktory.tolerations -- A list of node tolerations for the faktory deployment
   tolerations: []
 
+  # faktory.affinity -- Pod affinity spec for the faktory deployment
   affinity: {}
 
+  service:
+    # faktory.service.type -- service type for faktory
+    type: ClusterIP
+    # faktory.service.annotations -- A map of service annotations for faktory
+    annotations: {}
+    # faktory.service.port -- TCP port for the faktory service, the target port is hardcoded in the service definition to ensure it's connection to the faktory deployment
+    port: 7419
+
   dash:
+    # faktory.dash.enabled -- Enable/Disable the faktory dashboard
     enabled: true
     service:
+      # faktory.dash.service.type -- Service type for the faktory dashbaord
       type: ClusterIP
-      port: 80
+      # faktory.dash.service.annotations -- A map of service annotations for the faktory fashbaord
+      annotations: {}
+      # faktory.dash.service.ports -- List of TCP ports for the faktory dashboard service, the target port is hardcoded in the service definition to ensure it's connection to the backend api deployment
+      ports: 
+        - 80
+
 
     ingress:
+      # faktory.dash.ingress.enabled -- Enable/Disable an ingress definition for the faktory dashboard
       enabled: true
+      # faktory.dash.ingress.annotations -- A map of ingress annotations for the faktory dashboard
       annotations:
         kubernetes.io/ingress.class: pizza-traefik
+      # faktory.dash.ingress.hosts -- A list of igress host definitions for the faktory dashboard
       hosts:
         - host: bailer-faktory.kube.pizza
           paths:
-            - /
+            - path: /
+              servicePort: 80
 
+      # faktory.dash.ingress.tls -- A list of ingress tls secrets
+      tls: []
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - chart-example.local
+
+# config -- Bailer config yaml, see https://github.com/nalbury/bailer for more info.
 config:
   bailers:
     - alert: PodCrashLooping
       labels:
         namespace: default
         pod: ^nginx-.*
-      serviceAccountName: bailer
+      serviceAccountName: bailer-admin
+      ttlSecondsAfterFinished: 900
       command:
         - /bin/bash
         - -c

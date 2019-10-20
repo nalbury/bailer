@@ -89,6 +89,8 @@ func bail(ctx worker.Context, args ...interface{}) error {
 
 	//Get service account to run bailer job with from map of interfaces
 	serviceAccountName := bailer["ServiceAccountName"].(string)
+	//Get the TTL for the bailer job from map of interfaces
+	ttlSecondsAfterFinished := bailer["TTLSecondsAfterFinished"].(*int32)
 
 	//The image and tag cmd for the bailer job need to be cast to strings
 	image := bailerContainer["Image"].(string) + ":" + bailerContainer["Tag"].(string)
@@ -131,7 +133,8 @@ func bail(ctx worker.Context, args ...interface{}) error {
 					ServiceAccountName: serviceAccountName,
 				},
 			},
-			BackoffLimit: &backoffLimit,
+			BackoffLimit:            &backoffLimit,
+			TTLSecondsAfterFinished: ttlSecondsAfterFinished,
 		},
 	}
 	//Run the bailer job

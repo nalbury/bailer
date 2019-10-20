@@ -65,11 +65,12 @@ type Container struct {
 //Bailer type
 
 type Bailer struct {
-	Alert              string            `mapstructure:"alert"`
-	Labels             map[string]string `mapstructure:"labels"`
-	Command            []string          `mapstructure:"command"`
-	Container          Container         `mapstructure:"container"`
-	ServiceAccountName string            `mapstructure:"serviceAccountName"`
+	Alert                   string            `mapstructure:"alert"`
+	Labels                  map[string]string `mapstructure:"labels"`
+	Command                 []string          `mapstructure:"command"`
+	Container               Container         `mapstructure:"container"`
+	ServiceAccountName      string            `mapstructure:"serviceAccountName"`
+	TTLSecondsAfterFinished int32             `mapstructure:"ttlSecondsAfterFinished"`
 }
 
 //Slice of Bailer structs

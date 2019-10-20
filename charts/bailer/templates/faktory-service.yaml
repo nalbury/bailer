@@ -1,9 +1,16 @@
+{{- if .Values.faktory.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ template "bailer.fullname" . }}-faktory
   labels:
 {{ include "bailer.labels" . | indent 4 }}
+{{- if .Values.faktory.service.annotations }}
+  annotations:
+  {{- range $key, $val := .Values.faktory.service.annotations }}
+    {{ $key }}: {{ $val }}
+  {{- end }}
+{{- end }}
 spec:
   type: {{ .Values.faktory.service.type }}
   ports:
@@ -12,5 +19,6 @@ spec:
       protocol: TCP
       name: tcp
   selector:
-    app.kubernetes.io/name: {{ include "bailer.name" . }}-faktory
-    app.kubernetes.io/instance: {{ .Release.Name }}
+    app: {{ include "bailer.name" . }}-faktory
+    release: {{ .Release.Name }}
+{{- end }}
