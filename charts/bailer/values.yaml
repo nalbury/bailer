@@ -18,7 +18,7 @@ bailer:
 
   image:
     # bailer.image.repository -- Container image to use for bailer
-    repository: quay.io/nalbury/bailer
+    repository: gcr.io/pizzakube/bailer
     # bailer.image.tag -- Container image tag to use for bailer, defaults to the appVersion set in the chart's Chart.yaml (usually matches the chart version)
     tag:
     # bailer.image.pullPolicy -- Pull policy to use for bailer container image
