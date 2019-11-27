@@ -1,4 +1,8 @@
 # Bailer
+
+**Please Note**
+This project is extremely untested and WIP. Use at your own risk.
+
 Bail out your leaky cluster.
 
 Bailer is an event driven service that can run a kubernetes job in response to a Prometheus AlertManager payload. 
